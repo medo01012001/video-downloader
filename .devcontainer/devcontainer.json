@@ -1,8 +1,8 @@
 {
   "name": "video-downloader",
   "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y ffmpeg && pip install -U -r requirements.txt",
-  "postStartCommand": "pip install -q -U yt-dlp; nohup python app.py > /tmp/app.log 2>&1 &",
+  "postCreateCommand": "(sudo apt-get update || true) && sudo apt-get install -y ffmpeg && pip install -U -r requirements.txt",
+  "postStartCommand": "pip install -q -U 'yt-dlp[default,curl-cffi]'; setsid nohup python app.py > /tmp/app.log 2>&1 &",
   "forwardPorts": [5000],
   "portsAttributes": {
     "5000": { "label": "Video Downloader", "onAutoForward": "openBrowser" }
