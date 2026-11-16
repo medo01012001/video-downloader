@@ -151,6 +151,8 @@ def clean_error(e: Exception) -> str:
     low = msg.lower()
     if "unsupported url" in low:
         return "هاد الرابط ما مدعومش"
+    if "audio codec" in low:
+        return "هاد الفيديو ما فيهش الصوت"
     if "not a bot" in low:
         return "يوتيوب بلوكا هاد السيرفر. جرب من البيسي (start.bat) ولا جرب منصة أخرى"
     if "private" in low or "login" in low or "cookies" in low:
