@@ -4,7 +4,13 @@
 
 مبني بـ Flask + [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
-## التشغيل
+## التشغيل فـ GitHub Codespaces (بلا ما تثبت والو)
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/medo01012001/video-downloader)
+
+التطبيق كيتشعل بوحدو على البور 5000. باش تشاركو مع صحابك: فـ **Ports** كليكي يمين على 5000 ← **Port Visibility ← Public** ونسخ الرابط.
+
+## التشغيل فالبيسي
 
 خاصك **Python 3.10+** و **ffmpeg** يكونو مثبتين.
 
