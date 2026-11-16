@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محمّل الفيديوهات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0f14; --card:#171922; --card2:#1f2230; --line:#2a2e3f;
+    --text:#eef0f7; --muted:#9097ad; --accent:#ff3d6e; --accent2:#7c5cff;
+    --ok:#22c55e; --err:#ef4444; --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:Cairo,system-ui,sans-serif;color:var(--text);
+    background:radial-gradient(1200px 600px at 80% -10%,#2a1640 0,transparent 60%),
+               radial-gradient(900px 500px at -10% 110%,#3a0f22 0,transparent 60%),var(--bg);
+    display:flex;justify-content:center;padding:40px 16px}
+  .wrap{width:100%;max-width:720px}
+  header{text-align:center;margin-bottom:28px}
+  .logo{width:64px;height:64px;border-radius:18px;margin:0 auto 14px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 40px #ff3d6e55}
+  h1{margin:0;font-size:clamp(26px,5vw,36px);font-weight:800}
+  .sub{color:var(--muted);margin-top:6px}
+  .platforms{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .chip{font-size:13px;padding:4px 12px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 20px 60px #0006}
+  .row{display:flex;gap:10px}
+  input[type=url]{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--text);
+    border-radius:14px;padding:14px 16px;font:inherit;font-size:16px;direction:ltr;text-align:left;outline:none}
+  input[type=url]:focus{border-color:var(--accent2)}
+  button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:14px 22px;cursor:pointer;color:#fff;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));transition:transform .15s,opacity .15s;white-space:nowrap}
+  button:hover{transform:translateY(-1px)} button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .ghost{background:var(--card2);border:1px solid var(--line)}
+  .preview{display:none;margin-top:20px;gap:16px}
+  .preview.show{display:flex}
+  .thumb{width:200px;aspect-ratio:16/9;object-fit:cover;border-radius:12px;background:var(--card2);flex-shrink:0}
+  .meta h2{margin:0 0 6px;font-size:17px;line-height:1.5}
+  .meta p{margin:0;color:var(--muted);font-size:14px}
+  .options{display:none;margin-top:20px}
+  .options.show{display:block}
+  .label{font-weight:700;margin:0 0 10px}
+  .types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+  .type{background:var(--card2);border:2px solid var(--line);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.15s}
+  .type .ic{font-size:28px} .type b{display:block;margin-top:4px}
+  .type small{color:var(--muted)}
+  .type.active{border-color:var(--accent);background:#ff3d6e14}
+  .qualities{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+  .q{padding:8px 16px;border-radius:99px;background:var(--card2);border:1px solid var(--line);cursor:pointer;font-weight:600;font-size:14px}
+  .q.active{background:var(--accent2);border-color:var(--accent2)}
+  .go{width:100%;font-size:18px;padding:16px}
+  .progress{display:none;margin-top:20px}
+  .progress.show{display:block}
+  .bar{height:12px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+  .pinfo{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-top:8px}
+  .msg{margin-top:16px;padding:12px 16px;border-radius:12px;display:none}
+  .msg.show{display:block}
+  .msg.err{background:#ef444420;border:1px solid #ef444466;color:#fca5a5}
+  .msg.ok{background:#22c55e20;border:1px solid #22c55e66;color:#86efac}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid #fff6;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:22px}
+  @media (max-width:560px){
+    .row{flex-direction:column}
+    .preview.show{flex-direction:column}
+    .thumb{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+    </div>
+    <h1>محمّل الفيديوهات</h1>
+    <div class="sub">لصق الرابط، ختار صوت ولا فيديو، وتيليشارجي</div>
+    <div class="platforms">
+      <span class="chip">YouTube</span><span class="chip">Facebook</span><span class="chip">Instagram</span>
+      <span class="chip">TikTok</span><span class="chip">X / Twitter</span><span class="chip">+1000 منصة</span>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="row">
+      <input id="url" type="url" placeholder="https://..." autocomplete="off">
+      <button id="fetchBtn">جيب المعلومات</button>
+    </div>
+
+    <div class="preview" id="preview">
+      <img class="thumb" id="thumb" alt="">
+      <div class="meta">
+        <h2 id="title"></h2>
+        <p id="sub"></p>
+      </div>
+    </div>
+
+    <div class="options" id="options">
+      <p class="label">شنو بغيتي؟</p>
+      <div class="types">
+        <div class="type active" data-type="video"><div class="ic">🎬</div><b>فيديو</b><small>MP4</small></div>
+        <div class="type" data-type="audio"><div class="ic">🎵</div><b>صوت فقط</b><small>MP3 / M4A / WAV</small></div>
+      </div>
+      <p class="label" id="qLabel">الجودة</p>
+      <div class="qualities" id="qualities"></div>
+      <button class="go" id="goBtn">⬇ تيليشارجي</button>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="pinfo"><span id="pstatus">كنبداو...</span><span id="pdetail"></span></div>
+    </div>
+
+    <div class="msg" id="msg"></div>
+  </div>
+  <footer>حمّل غير المحتوى اللي عندك الحق فيه 🙏</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let info = null, type = "video", quality = "best";
+
+function show(el, on = true){ el.classList.toggle("show", on); }
+function message(text, kind = "err"){ const m = $("msg"); m.className = "msg show " + kind; m.textContent = text; }
+function clearMsg(){ $("msg").className = "msg"; }
+function fmtDur(s){ if(!s) return ""; s=Math.round(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60;
+  return (h? h+":"+String(m).padStart(2,"0") : m) + ":" + String(x).padStart(2,"0"); }
+
+function renderQualities(){
+  const box = $("qualities"); box.innerHTML = "";
+  let list;
+  if(type === "audio"){
+    $("qLabel").textContent = "الصيغة";
+    list = [["mp3","MP3"],["m4a","M4A"],["wav","WAV"],["opus","OPUS"]];
+  } else {
+    $("qLabel").textContent = "الجودة";
+    const hs = (info?.heights || []).filter(h => h >= 144);
+    list = [["best","أحسن جودة"], ...[...new Set(hs)].map(h => [String(h), h + "p"])];
+  }
+  quality = list[0][0];
+  list.forEach(([v, label], i) => {
+    const d = document.createElement("div");
+    d.className = "q" + (i === 0 ? " active" : "");
+    d.textContent = label;
+    d.onclick = () => { box.querySelectorAll(".q").forEach(x => x.classList.remove("active")); d.classList.add("active"); quality = v; };
+    box.appendChild(d);
+  });
+}
+
+document.querySelectorAll(".type").forEach(el => el.onclick = () => {
+  document.querySelectorAll(".type").forEach(x => x.classList.remove("active"));
+  el.classList.add("active"); type = el.dataset.type; renderQualities();
+});
+
+async function fetchInfo(){
+  const url = $("url").value.trim();
+  if(!url) return message("لصق الرابط ديال الفيديو الأول");
+  clearMsg(); show($("preview"), false); show($("options"), false); show($("progress"), false);
+  const b = $("fetchBtn"); b.disabled = true; b.innerHTML = '<span class="spinner"></span>';
+  try{
+    const r = await fetch("/api/info", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({url})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error);
+    info = d;
+    $("thumb").src = d.thumbnail || ""; $("thumb").style.display = d.thumbnail ? "" : "none";
+    $("title").textContent = d.title || "بلا عنوان";
+    $("sub").textContent = [d.platform, d.uploader, fmtDur(d.duration)].filter(Boolean).join(" • ");
+    show($("preview")); show($("options")); renderQualities();
+  }catch(e){ message(e.message || "وقع مشكل، عاود جرب"); }
+  finally{ b.disabled = false; b.textContent = "جيب المعلومات"; }
+}
+
+async function startDownload(){
+  const url = $("url").value.trim();
+  clearMsg(); const g = $("goBtn"); g.disabled = true;
+  show($("progress")); $("fill").style.width = "0%"; $("pstatus").textContent = "كنبداو..."; $("pdetail").textContent = "";
+  try{
+    const r = await fetch("/api/download", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({url, type, quality})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error);
+    poll(d.job_id);
+  }catch(e){ message(e.message); g.disabled = false; show($("progress"), false); }
+}
+
+async function poll(id){
+  try{
+    const r = await fetch("/api/progress/" + id); const d = await r.json();
+    if(!r.ok) throw new Error(d.error);
+    $("fill").style.width = (d.percent || 0) + "%";
+    const labels = {starting:"كنوجدو...", downloading:"كنتيليشارجيو " + (d.percent||0) + "%", processing:"كنحضرو الملف (ffmpeg)...", done:"سالا ✅"};
+    $("pstatus").textContent = labels[d.status] || d.status;
+    $("pdetail").textContent = d.status === "downloading" ? [d.speed, d.eta && ("باقي " + d.eta)].filter(Boolean).join(" • ") : "";
+    if(d.status === "done"){
+      window.location.href = "/api/file/" + id;
+      message("التحميل سالا! إلى ما بداش الملف، ضغط هنا", "ok");
+      $("msg").style.cursor = "pointer"; $("msg").onclick = () => window.location.href = "/api/file/" + id;
+      $("goBtn").disabled = false; return;
+    }
+    if(d.status === "error") throw new Error(d.error);
+    setTimeout(() => poll(id), 700);
+  }catch(e){ message(e.message || "وقع مشكل"); $("goBtn").disabled = false; show($("progress"), false); }
+}
+
+$("fetchBtn").onclick = fetchInfo;
+$("goBtn").onclick = startDownload;
+$("url").addEventListener("keydown", e => { if(e.key === "Enter") fetchInfo(); });
+$("url").addEventListener("paste", () => setTimeout(fetchInfo, 50));
+</script>
+</body>
+</html>
